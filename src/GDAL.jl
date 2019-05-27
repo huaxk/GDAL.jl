@@ -45,10 +45,20 @@ include("error.jl")
 
 const GDALVERSION = Ref{VersionNumber}()
 const GDAL_DATA = Ref{String}()
+const PROJ_LIB = Ref{String}()
+const PJ_CONTEXT = Ref{Ptr{Cvoid}}()
 
 function __init__()
     # Always check your dependencies from `deps.jl`
     check_deps()
+
+    # set PROJ_LIB, both as environment variable and directly in PROJ
+    PROJ_LIB[] = abspath(@__DIR__, "..", "deps", "usr", "share", "proj")
+    ENV["PROJ_LIB"] = PROJ_LIB[]
+    PJ_CONTEXT[] = ccall((:proj_context_create, libproj), Ptr{Cvoid}, ())
+    ccall((:proj_context_set_search_paths, libproj), Cvoid, (Ptr{Cvoid}, Cint, Ptr{Cstring}), PJ_CONTEXT[], 1, [PROJ_LIB[]])
+    dbpath = unsafe_string(ccall((:proj_context_get_database_path, libproj), Cstring, (Ptr{Cvoid},), PJ_CONTEXT[]))
+    @show dbpath
 
     # register custom error handler
     funcptr = @cfunction(gdaljl_errorhandler, Ptr{Cvoid}, (CPLErr, Cint, Cstring))
