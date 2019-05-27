@@ -45,4 +45,4 @@ if unsatisfied || !isinstalled(dl_info...; prefix=prefix)
 end
 
 # Write out a deps.jl file that will contain mappings for our products
-write_deps_file(joinpath(@__DIR__, "deps.jl"), products, verbose=verbose)
+write_deps_file(joinpath(@__DIR__, "deps_sqlite.jl"), products, verbose=verbose)

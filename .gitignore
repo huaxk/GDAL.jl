@@ -1,4 +1,5 @@
 /deps/deps.jl
+/deps/deps_*.jl
 /deps/build.log
 /deps/usr
 /gen/doxygen.xml

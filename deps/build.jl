@@ -85,4 +85,34 @@ if unsatisfied || !isinstalled(dl_info...; prefix=prefix)
 end
 
 # Write out a deps.jl file that will contain mappings for our products
-write_deps_file(joinpath(@__DIR__, "deps.jl"), products, verbose=verbose)
+write_deps_file(joinpath(@__DIR__, "deps_gdal.jl"), products, verbose=verbose)
+
+function include_deps(name)
+    """
+    module $name
+        import Libdl
+        path = joinpath(@__DIR__, $(repr(string("deps_", name, ".jl"))))
+        isfile(path) || error("$name wasn't build correctly. Please run Pkg.build(\\\"GDAL\\\")")
+        include(path)
+    end
+    using .$name
+    """
+end
+
+open("deps.jl", "w") do io
+    for dep in (:zlib, :geos, :sqlite, :proj, :curl, :gdal)
+        println(io, include_deps(dep))
+    end
+    println(io, """
+    const libgdal = gdal.libgdal
+    const libproj = proj.libproj
+    function check_deps()
+        zlib.check_deps()
+        geos.check_deps()
+        sqlite.check_deps()
+        proj.check_deps()
+        curl.check_deps()
+        gdal.check_deps()
+    end
+    """)
+end
