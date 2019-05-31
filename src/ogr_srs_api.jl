@@ -455,10 +455,11 @@ end
                     const char * pszKey,
                     int iChild) -> const char *
 
-Fetch indicated attribute of named node.
+Fetch indicated attribute of named node or return nothing if attribute of named node not exist.
 """
 function getattrvalue(hSRS::Ref{OGRSpatialReferenceH}, pszName, iChild::Integer)
-    unsafe_string(ccall((:OSRGetAttrValue, libgdal), Cstring, (Ptr{Cvoid}, Cstring, Cint), hSRS, pszName, iChild))
+    result = ccall((:OSRGetAttrValue, libgdal), Cstring, (Ptr{Cvoid}, Cstring, Cint), hSRS, pszName, iChild)
+    result != Cstring(Ptr{UInt8}(0)) ? unsafe_string(result) : nothing
 end
 
 
